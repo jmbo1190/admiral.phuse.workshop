@@ -20,3 +20,29 @@ library(haven)
 advs_temp <- read_xpt(url("https://github.com/Roche-GSK/admiral.phuse.workshop/raw/main/Hands_on_Exercises/advs_temp.xpt"))
 
 # Use admiral functions to create the required baseline variables
+
+advs <- advs_temp %>%
+  
+# Calculate ABLFL
+
+  derive_extreme_flag(
+    dataset=advs_temp,
+    by_vars = vars(STUDYID, USUBJID, PARAMCD),
+    order = vars(ADT),
+    new_var = ABLFL,
+    mode = "last",
+    filter = (!is.na(AVAL) & ADT <= TRTSDT)
+  ) %>%
+  
+  # Calculate BASE
+  derive_var_base(
+    by_vars = vars(STUDYID, USUBJID, PARAMCD)
+  ) %>%
+  
+  # Calculate CHG
+  derive_var_chg() %>%
+  
+  # Sort the data frame
+  arrange(USUBJID, PARAMCD, ADT)
+
+  
